@@ -55,7 +55,7 @@
 
 <section class="page" id="nutrition">
 <h1>Nutrition</h1><p class="sub">Fuel your day. Keep it simple.</p>
-<div class="card"><div class="row"><div><div class="tiny">CALORIES TODAY</div><div class="big"><span id="calTotal">0</span><span class="muted" style="font-size:15px;font-weight:500"> / <span id="calTargetText">2500</span></span></div></div><div class="ring" id="calRing" style="--deg:0deg"><b id="calPercent">0%</b></div></div><div class="progress"><span id="calBar" style="width:0%"></span></div><div class="formrow"><div class="field"><label>DAILY CALORIE TARGET</label><input class="input" id="calTarget" type="number" min="1" value="2500" onchange="saveTargets()"></div><div class="field"><label>PROTEIN TARGET (G)</label><input class="input" id="proteinTarget" type="number" min="0" value="150" onchange="saveTargets()"></div><div class="field"><label>CARBS TARGET (G)</label><input class="input" id="carbTarget" type="number" min="0" value="300" onchange="saveTargets()"></div><div class="field"><label>FAT TARGET (G)</label><input class="input" id="fatTarget" type="number" min="0" value="80" onchange="saveTargets()"></div></div></div>
+<div class="card"><div class="row"><div><div class="tiny">CALORIES TODAY</div><div class="big"><span id="calTotal">0</span><span class="muted" style="font-size:15px;font-weight:500"> / <span id="calTargetText">2500</span></span></div></div><div class="ring" id="calRing" style="--deg:0deg"><b id="calPercent">0%</b></div></div><div class="progress"><span id="calBar" style="width:0%"></span></div><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn ghost" onclick="openTargetForm()">✎ Edit nutrition goals</button></div></div>
 <div class="grid2"><div class="card"><div class="tiny">PROTEIN</div><strong id="proteinNow" class="big">0g</strong><div class="macro" id="proteinLeft">of 150g</div><div class="progress"><span id="proteinBar" style="width:0%"></span></div></div><div class="card"><div class="tiny">CARBS</div><strong id="carbNow" class="big">0g</strong><div class="macro" id="carbLeft">of 300g</div><div class="progress"><span id="carbBar" style="width:0%"></span></div></div><div class="card"><div class="tiny">FAT</div><strong id="fatNow" class="big">0g</strong><div class="macro" id="fatLeft">of 80g</div><div class="progress"><span id="fatBar" style="width:0%"></span></div></div><div class="card"><div class="tiny">WATER</div><strong id="waterNow" class="big">0ml</strong><button class="btn secondary" style="margin-top:6px" onclick="addWater(250)">＋ 250ml</button></div></div>
 <div class="card"><div class="row"><div><h2>Scan food</h2><div class="tiny">Barcode lookup or meal photo analysis</div></div><span class="pill">Free tools</span></div><div class="formrow"><button class="btn secondary" onclick="openBarcodeScanner()">▥ Scan barcode</button><button class="btn secondary" onclick="openMealPhoto()">◎ Scan meal photo</button></div><div class="tiny" style="margin-top:10px">Barcode results use Open Food Facts. Photo recognition requires a compatible on-device AI model; this build includes the photo capture and review workflow, not a trained model yet.</div></div>
 <div class="row"><h2>Food diary</h2><button class="btn" onclick="openFoodForm()">＋ Add food</button></div>
@@ -82,10 +82,14 @@
 <h1>Your profile</h1><p class="sub">Make reset feel like yours.</p>
 <div class="card">
   <div class="profile-hero"><div class="profile-avatar" id="profileAvatar">R</div>
-  <label class="btn profile-upload" for="profilePhotoInput">Change photo</label>
-  <input id="profilePhotoInput" type="file" accept="image/*" capture="user" hidden onchange="changeProfilePhoto(event)">
+  <div class="formrow" style="justify-content:center">
+    <label class="btn profile-upload" for="profilePhotoInput">Upload photo</label>
+    <label class="btn secondary profile-upload" for="profileCameraInput">Take photo</label>
+  </div>
+  <input id="profilePhotoInput" type="file" accept="image/*" hidden onchange="changeProfilePhoto(event)">
+  <input id="profileCameraInput" type="file" accept="image/*" capture="environment" hidden onchange="changeProfilePhoto(event)">
   <button class="btn ghost" onclick="removeProfilePhoto()">Remove photo</button>
-  <div class="tiny" style="margin-top:8px">Your photo is saved on this device.</div></div>
+  <div class="tiny" style="margin-top:8px">Choose a photo from your library or take a new one. Your photo appears in the top corner.</div></div>
   <div class="field"><label>YOUR NAME</label><input class="input" id="profileName" placeholder="What should we call you?"></div>
   <div class="formrow"><div class="field"><label>AGE</label><input class="input" id="profileAge" type="number" placeholder="Age"></div><div class="field"><label>HEIGHT (CM)</label><input class="input" id="profileHeight" type="number" placeholder="Height"></div></div>
   <div class="formrow"><div class="field"><label>WEIGHT (KG)</label><input class="input" id="profileWeight" type="number" step=".1" placeholder="Weight"></div><div class="field"><label>WATER TARGET (ML)</label><input class="input" id="profileWater" type="number" placeholder="2000"></div></div>
@@ -130,19 +134,39 @@ function renderHabits(){let done=state.history[today()]||[];state.habits.forEach
 function deleteHabit(id){if(!confirm('Delete this habit?'))return;state.habits=state.habits.filter(h=>h.id!==id);save()}
 function foodsToday(){return state.foods.filter(f=>f.date===today())}
 function totals(){return foodsToday().reduce((a,f)=>({cal:a.cal+f.cal,protein:a.protein+f.protein,carbs:a.carbs+f.carbs,fat:a.fat+f.fat}),{cal:0,protein:0,carbs:0,fat:0})}
-function renderNutrition(){let t=totals(),g=state.targets;['cal','protein','carbs','fat'].forEach(k=>{let v=k==='cal'?t.cal:t[k],target=g[k];let pct=target?Math.min(100,v/target*100):0;if(k==='cal'){$('calTotal').textContent=v;$('calTargetText').textContent=target;$('calPercent').textContent=Math.round(pct)+'%';$('calBar').style.width=pct+'%';$('calRing').style.setProperty('--deg',pct*3.6+'deg')}else{$(k+'Now').textContent=v+'g';$(k+'Left').textContent='of '+target+'g';$(k+'Bar').style.width=pct+'%'}});$('waterNow').textContent=(state.water[today()]||0)+'ml';$('calTarget').value=g.cal;$('proteinTarget').value=g.protein;$('carbTarget').value=g.carbs;$('fatTarget').value=g.fat;$('foodList').innerHTML=foodsToday().length?foodsToday().map(f=>`<div class="foodrow"><div><b>${esc(f.name)}</b><div class="macro">${f.protein}g protein · ${f.carbs}g carbs · ${f.fat}g fat</div></div><div style="text-align:right"><b>${f.cal} kcal</b><div><button class="btn ghost" onclick="deleteFood(${f.id})">Remove</button></div></div></div>`).join(''):'<div class="empty">Nothing logged yet. Add your first food.</div>'}
-function saveTargets(){state.targets={cal:+$('calTarget').value||2500,protein:+$('proteinTarget').value||0,carbs:+$('carbTarget').value||0,fat:+$('fatTarget').value||0};save()}
+function renderNutrition(){
+let t=totals(),g=state.targets;
+let pct=g.cal?Math.min(100,t.cal/g.cal*100):0;
+$('calTotal').textContent=t.cal;
+$('calTargetText').textContent=g.cal;
+$('calPercent').textContent=Math.round(pct)+'%';
+$('calBar').style.width=pct+'%';
+$('calRing').style.setProperty('--deg',pct*3.6+'deg');
+[['protein','protein'],['carbs','carb'],['fat','fat']].forEach(([key,id])=>{
+let value=t[key]||0,target=g[key]||0,progress=target?Math.min(100,value/target*100):0;
+$(id+'Now').textContent=value+'g';
+$(id+'Left').textContent='of '+target+'g';
+$(id+'Bar').style.width=progress+'%';
+});
+$('waterNow').textContent=(state.water[today()]||0)+'ml';
+$('foodList').innerHTML=foodsToday().length?foodsToday().map(f=>`<div class="foodrow"><div><b>${esc(f.name)}</b><div class="macro">${f.protein}g protein · ${f.carbs}g carbs · ${f.fat}g fat</div></div><div style="text-align:right"><b>${f.cal} kcal</b><div><button class="btn ghost" onclick="deleteFood(${f.id})">Remove</button></div></div></div>`).join(''):'<div class="empty">Nothing logged yet. Add your first food.</div>';
+}
+
+function openTargetForm(){let g=state.targets;openModal('Edit nutrition goals',`<div class="formrow"><div class="field"><label>DAILY CALORIES</label><input class="input" id="editCalTarget" type="number" min="1" value="${g.cal}"></div><div class="field"><label>PROTEIN (G)</label><input class="input" id="editProteinTarget" type="number" min="0" value="${g.protein}"></div><div class="field"><label>CARBS (G)</label><input class="input" id="editCarbTarget" type="number" min="0" value="${g.carbs}"></div><div class="field"><label>FAT (G)</label><input class="input" id="editFatTarget" type="number" min="0" value="${g.fat}"></div></div><button class="btn" onclick="saveTargets()">Save goals</button>`)}
+function saveTargets(){let cal=+$('editCalTarget')?.value,protein=+$('editProteinTarget')?.value,carbs=+$('editCarbTarget')?.value,fat=+$('editFatTarget')?.value;state.targets={cal:cal>0?cal:state.targets.cal,protein:protein>=0?protein:state.targets.protein,carbs:carbs>=0?carbs:state.targets.carbs,fat:fat>=0?fat:state.targets.fat};closeModal();save();toast('Nutrition goals updated')}
+
 function openFoodForm(){openModal('Add food',`<div class="field"><label>FOOD / MEAL NAME</label><input class="input" id="foodName" placeholder="e.g. Chicken and rice"></div><div class="formrow">${[['Calories','foodCal'],['Protein (g)','foodP'],['Carbs (g)','foodC'],['Fat (g)','foodF']].map(x=>`<div class="field"><label>${x[0].toUpperCase()}</label><input class="input" id="${x[1]}" type="number" min="0" value="0"></div>`).join('')}</div><button class="btn" onclick="addFood()">Add to diary</button>`)}
 function addFood(){let name=$('foodName').value.trim();if(!name)return toast('Enter a food name');state.foods.push({id:Date.now(),date:today(),name,cal:+$('foodCal').value||0,protein:+$('foodP').value||0,carbs:+$('foodC').value||0,fat:+$('foodF').value||0});closeModal();save();toast('Food logged')}
 function deleteFood(id){state.foods=state.foods.filter(f=>f.id!==id);save()}
 function addWater(n){state.water[today()]=(state.water[today()]||0)+n;save();toast('Water added')}
 function setMealType(t,btn){mealType=t;document.querySelectorAll('#mealTabs button').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');$('mealHeading').textContent=t;renderMeals()}
-function openMealForm(){openModal('Plan a meal',`<div class="field"><label>MEAL NAME</label><input class="input" id="mealName" placeholder="e.g. Greek yoghurt bowl"></div><div class="formrow"><div class="field"><label>DATE</label><input class="input" id="mealDate" type="date" value="${mealDay}"></div><div class="field"><label>MEAL TYPE</label><select class="input" id="mealKind"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option></select></div></div><div class="formrow"><div class="field"><label>CALORIES (OPTIONAL)</label><input class="input" id="mealCal" type="number" value="0"></div><div class="field"><label>PROTEIN (G)</label><input class="input" id="mealProtein" type="number" value="0"></div></div><button class="btn" onclick="addMeal()">Save to planner</button>`)}
-function addMeal(){let name=$('mealName').value.trim();if(!name)return toast('Enter a meal name');let m={id:Date.now(),name,date:$('mealDate').value||today(),type:$('mealKind').value,cal:+$('mealCal').value||0,protein:+$('mealProtein').value||0};state.meals.push(m);if(!state.savedMeals.some(x=>x.name.toLowerCase()===name.toLowerCase()))state.savedMeals.push({name,cal:m.cal,protein:m.protein});closeModal();save();toast('Meal planned')}
-function renderMeals(){let d=new Date();let start=new Date(d);start.setDate(d.getDate()-((d.getDay()+6)%7));$('weekLabel').textContent=start.toLocaleDateString(undefined,{month:'short',day:'numeric'});$('weekDays').innerHTML=Array.from({length:7},(_,i)=>{let x=new Date(start);x.setDate(start.getDate()+i);let k=x.toISOString().slice(0,10);return `<div class="day ${k===mealDay?'today':''}" onclick="mealDay='${k}';renderMeals()">${x.toLocaleDateString(undefined,{weekday:'short'})}<strong>${x.getDate()}</strong></div>`}).join('');let list=state.meals.filter(m=>m.date===mealDay&&m.type===mealType);$('mealList').innerHTML=list.length?list.map(m=>`<div class="mealrow"><div><b>${esc(m.name)}</b><div class="macro">${m.cal} kcal · ${m.protein}g protein</div></div><button class="btn ghost" onclick="logMeal(${m.id})">Log</button><button class="btn ghost" onclick="removeMeal(${m.id})">✕</button></div>`).join(''):'<div class="empty">Nothing planned for this meal yet.</div>';$('savedMeals').innerHTML=state.savedMeals.length?state.savedMeals.map((m,i)=>`<div class="mealrow"><div><b>${esc(m.name)}</b><div class="macro">${m.cal} kcal · ${m.protein}g protein</div></div><button class="btn secondary" onclick="quickPlan(${i})">＋ Plan</button></div>`).join(''):'<div class="empty">Your saved meal ideas will appear here as you add meals.</div>'}
-function logMeal(id){let m=state.meals.find(x=>x.id===id);if(!m)return;state.foods.push({id:Date.now(),date:today(),name:m.name,cal:m.cal,protein:m.protein,carbs:0,fat:0});save();toast('Added to nutrition diary')}
+function openMealForm(){openModal('Plan a meal',`<div class="field"><label>MEAL NAME</label><input class="input" id="mealName" placeholder="e.g. Greek yoghurt bowl"></div><div class="formrow"><div class="field"><label>DATE</label><input class="input" id="mealDate" type="date" value="${mealDay}"></div><div class="field"><label>MEAL TYPE</label><select class="input" id="mealKind"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option></select></div></div><div class="formrow"><div class="field"><label>CALORIES</label><input class="input" id="mealCal" type="number" min="0" value="0"></div><div class="field"><label>PROTEIN (G)</label><input class="input" id="mealProtein" type="number" min="0" value="0"></div><div class="field"><label>CARBS (G)</label><input class="input" id="mealCarbs" type="number" min="0" value="0"></div><div class="field"><label>FAT (G)</label><input class="input" id="mealFat" type="number" min="0" value="0"></div></div><button class="btn" onclick="addMeal()">Save to planner</button>`)}
+function addMeal(){let name=$('mealName').value.trim();if(!name)return toast('Enter a meal name');let m={id:Date.now(),name,date:$('mealDate').value||today(),type:$('mealKind').value,cal:+$('mealCal').value||0,protein:+$('mealProtein').value||0,carbs:+$('mealCarbs').value||0,fat:+$('mealFat').value||0};state.meals.push(m);if(!state.savedMeals.some(x=>x.name.toLowerCase()===name.toLowerCase()))state.savedMeals.push({name,cal:m.cal,protein:m.protein,carbs:m.carbs,fat:m.fat});closeModal();save();toast('Meal planned')}
+function renderMeals(){let d=new Date();let start=new Date(d);start.setDate(d.getDate()-((d.getDay()+6)%7));$('weekLabel').textContent=start.toLocaleDateString(undefined,{month:'short',day:'numeric'});$('weekDays').innerHTML=Array.from({length:7},(_,i)=>{let x=new Date(start);x.setDate(start.getDate()+i);let k=x.toISOString().slice(0,10);return `<div class="day ${k===mealDay?'today':''}" onclick="mealDay='${k}';renderMeals()">${x.toLocaleDateString(undefined,{weekday:'short'})}<strong>${x.getDate()}</strong></div>`}).join('');let list=state.meals.filter(m=>m.date===mealDay&&m.type===mealType);$('mealList').innerHTML=list.length?list.map(m=>{let logged=state.foods.some(f=>f.plannedMealId===m.id);return `<div class="mealrow"><div><b>${esc(m.name)}</b><div class="macro">${m.cal} kcal · ${m.protein||0}g protein · ${m.carbs||0}g carbs · ${m.fat||0}g fat</div></div><button class="btn ${logged?'ghost':'secondary'}" onclick="logMeal(${m.id})" ${logged?'disabled':''}>${logged?'✓ Added to tracker':'＋ Add to nutrition'}</button><button class="btn ghost" onclick="removeMeal(${m.id})">✕</button></div>`}).join(''):'<div class="empty">Nothing planned for this meal yet.</div>';$('savedMeals').innerHTML=state.savedMeals.length?state.savedMeals.map((m,i)=>`<div class="mealrow"><div><b>${esc(m.name)}</b><div class="macro">${m.cal} kcal · ${m.protein||0}g protein · ${m.carbs||0}g carbs · ${m.fat||0}g fat</div></div><button class="btn secondary" onclick="quickPlan(${i})">＋ Plan</button></div>`).join(''):'<div class="empty">Your saved meal ideas will appear here as you add meals.</div>'}
+function logMeal(id){let m=state.meals.find(x=>x.id===id);if(!m)return;if(state.foods.some(f=>f.plannedMealId===m.id))return toast('This meal is already in your tracker');state.foods.push({id:Date.now(),plannedMealId:m.id,date:today(),name:m.name,cal:m.cal||0,protein:m.protein||0,carbs:m.carbs||0,fat:m.fat||0});save();renderMeals();toast('Meal added to today’s nutrition tracker')}
 function removeMeal(id){state.meals=state.meals.filter(m=>m.id!==id);save()}
 function quickPlan(i){let m=state.savedMeals[i];state.meals.push({...m,id:Date.now(),date:mealDay,type:mealType});save();toast('Meal added to planner')}
+
 function openWeightForm(){openModal('Log body weight',`<div class="field"><label>WEIGHT (KG)</label><input class="input" id="weightValue" type="number" step=".1" placeholder="e.g. 72.0"></div><button class="btn" onclick="addWeight()">Save weight</button>`)}
 function addWeight(){let v=+$('weightValue').value;if(!v)return toast('Enter a weight');state.weights.push({date:today(),value:v});closeModal();save();toast('Weight saved')}
 function openDB(){return new Promise((resolve,reject)=>{let r=indexedDB.open('resetPhotos',1);r.onupgradeneeded=()=>r.result.createObjectStore('photos',{keyPath:'id'});r.onsuccess=()=>{db=r.result;resolve(db)};r.onerror=()=>reject(r.error)})}
@@ -167,9 +191,38 @@ function openProfile(){let p=profileData();openModal('Your profile',`
 <p class="tiny">Your calorie and macro targets remain editable in Nutrition.</p><button class="btn" onclick="saveProfile()">Save profile</button>`)}
 function saveProfile(){state.profile={name:$('pName').value.trim(),age:$('pAge').value,height:$('pHeight').value,weight:$('pWeight').value,water:+$('pWater').value||2000,goal:$('pGoal').value};if(state.profile.weight){state.weights.push({date:today(),value:+state.profile.weight})}closeModal();save();toast('Profile updated')}
 function updateProfileUI(){let p=profileData(),initial=p.name?p.name.trim().charAt(0).toUpperCase():'R';let avatar=$('avatarButton');avatar.innerHTML=p.photo?`<img src="${p.photo}" alt="Profile photo">`:initial;avatar.title=p.name||'Profile';let hero=$('profileAvatar');if(hero)hero.innerHTML=p.photo?`<img src="${p.photo}" alt="Profile photo">`:initial;if($('profileName')){$('profileName').value=p.name||'';$('profileAge').value=p.age||'';$('profileHeight').value=p.height||'';$('profileWeight').value=p.weight||'';$('profileWater').value=p.water||2000;$('profileGoal').value=p.goal||'Build muscle';}}
-function changeProfilePhoto(e){let file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith('image/'))return toast('Choose an image file');let reader=new FileReader();reader.onload=()=>{let img=new Image();img.onload=()=>{let c=document.createElement('canvas'),scale=Math.min(1,512/Math.max(img.width,img.height));c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);profileData().photo=c.toDataURL('image/jpeg',.78);state.profile={...profileData(),photo:c.toDataURL('image/jpeg',.78)};save();toast('Profile photo updated')};img.src=reader.result};reader.readAsDataURL(file);e.target.value=''}
+function changeProfilePhoto(e){
+let file=e.target.files&&e.target.files[0];if(!file)return;
+if(!file.type.startsWith('image/')){toast('Choose an image file');e.target.value='';return}
+if(file.size>15*1024*1024){toast('Choose an image smaller than 15 MB');e.target.value='';return}
+let reader=new FileReader();
+reader.onerror=()=>{toast('Could not read that photo');e.target.value=''};
+reader.onload=()=>{
+let img=new Image();
+img.onerror=()=>{toast('Could not open that photo');e.target.value=''};
+img.onload=()=>{
+let c=document.createElement('canvas'),scale=Math.min(1,384/Math.max(img.width,img.height));
+c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));
+let ctx=c.getContext('2d');ctx.fillStyle='#171719';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0,c.width,c.height);
+let photo=c.toDataURL('image/jpeg',.68);
+state.profile={...profileData(),photo};
+try{localStorage.setItem('resetState',JSON.stringify(state));updateProfileUI();toast('Profile photo updated');}
+catch(err){toast('Photo could not be saved. Try a smaller image.');}
+e.target.value='';
+};
+img.src=reader.result;
+};
+reader.readAsDataURL(file);
+}
+
 function removeProfilePhoto(){state.profile={...profileData(),photo:''};save();toast('Profile photo removed')}
-function saveProfilePage(){let p=profileData();state.profile={...p,name:$('profileName').value.trim(),age:$('profileAge').value,height:$('profileHeight').value,weight:$('profileWeight').value,water:+$('profileWater').value||2000,goal:$('profileGoal').value};if(state.profile.weight)state.weights.push({date:today(),value:+state.profile.weight});save();toast('Profile saved')}
+function saveProfilePage(){
+let p=profileData();
+state.profile={...p,name:$('profileName').value.trim(),age:$('profileAge').value,height:$('profileHeight').value,weight:$('profileWeight').value,water:+$('profileWater').value||2000,goal:$('profileGoal').value};
+if(state.profile.weight&&!state.weights.some(w=>w.date===today()&&+w.value===+state.profile.weight))state.weights.push({date:today(),value:+state.profile.weight});
+try{localStorage.setItem('resetState',JSON.stringify(state));updateProfileUI();renderAll();showPage('home');toast('Profile saved');}
+catch(err){toast('Could not save profile. Free up browser storage and try again.');}
+}
 // Habit calendar
 let calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1),calendarSelected=today();
 function changeCalMonth(n){calendarMonth.setMonth(calendarMonth.getMonth()+n);renderCalendar()}
