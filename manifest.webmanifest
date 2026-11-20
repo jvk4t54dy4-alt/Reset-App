@@ -5,13 +5,13 @@
   "display": "standalone",
   "background_color": "#0c0c0d",
   "theme_color": "#0c0c0d",
-  "description": "A private habit, nutrition and progress tracker."
+  "description": "A private habit, nutrition and progress tracker.",
+  "icons": [
+    {
+      "src": "./app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }
-"icons": [
-  {
-    "src": "./app-icon.png",
-    "sizes": "512x512",
-    "type": "image/png",
-    "purpose": "any"
-  }
-]
