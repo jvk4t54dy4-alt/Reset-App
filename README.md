@@ -4,12 +4,17 @@
 - Black-and-orange visual refresh
 - Animated XP reward feedback and level-up overlay
 - Monthly habit calendar with per-day completion details
-- Editable profile: name, age, height, weight, fitness goal and water target
+- Dedicated profile page opened from the top-right avatar, with profile-photo upload/removal and editable name, age, height, weight, fitness goal and water target
+- Personalised home greeting (e.g. “Good evening, Alex”)
+- Orange XP particles that fly toward the XP bar, plus an animated level-up celebration
 - Existing editable calorie and macro targets
 - Progress photo comparison wipe slider
-- Barcode lookup through the free Open Food Facts API, with camera scanning where the browser supports BarcodeDetector and manual barcode entry fallback
-- Meal-photo capture/review workflow with editable nutrition estimates
+- Barcode lookup through the free Open Food Facts API, with camera scanning using the browser BarcodeDetector when available, with a ZXing fallback for Safari/iPhone and manual barcode entry
+- Live meal-camera capture plus photo-library selection and review workflow with editable nutrition estimates
 - Local-first storage retained for habits, food, meals, weight and progress photos
+
+## Camera requirements
+Camera access requires the app to be opened from its HTTPS GitHub Pages URL (or localhost) and camera permission must be allowed in Safari. Barcode scanning uses the built-in browser detector or loads the ZXing scanner library from a CDN; manual barcode entry remains available if camera access or the CDN is unavailable.
 
 ## Important AI limitation
 This build does **not** yet include a trained on-device food-recognition model. The meal-photo screen captures a photo and lets you enter/review identified foods and macros; it does not claim to automatically recognise foods. Integrating a real on-device model is a separate next step and requires selecting and packaging a browser-compatible model that can run within iPhone Safari memory limits.
