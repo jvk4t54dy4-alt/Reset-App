@@ -1,30 +1,30 @@
-# reset. — free personal lifestyle app
+# reset. — updated web app
 
-## Included
-- Home dashboard
-- Habit tracker with +10 XP per completion, +50 daily completion bonus, levels, and streak display
-- Calorie and macro tracker with editable targets and manual food entry
-- Weekly meal planner and saved meal ideas
-- Progress photos saved in browser IndexedDB on this device, side-by-side comparison, and weight log
-- Local-first data storage; no account, paid API, subscription, or trial
+## Included in this update
+- Black-and-orange visual refresh
+- Animated XP reward feedback and level-up overlay
+- Monthly habit calendar with per-day completion details
+- Editable profile: name, age, height, weight, fitness goal and water target
+- Existing editable calorie and macro targets
+- Progress photo comparison wipe slider
+- Barcode lookup through the free Open Food Facts API, with camera scanning where the browser supports BarcodeDetector and manual barcode entry fallback
+- Meal-photo capture/review workflow with editable nutrition estimates
+- Local-first storage retained for habits, food, meals, weight and progress photos
 
-## Run locally
-Open `index.html` in a modern browser. The core app works locally. Browser storage is tied to that browser/device.
+## Important AI limitation
+This build does **not** yet include a trained on-device food-recognition model. The meal-photo screen captures a photo and lets you enter/review identified foods and macros; it does not claim to automatically recognise foods. Integrating a real on-device model is a separate next step and requires selecting and packaging a browser-compatible model that can run within iPhone Safari memory limits.
 
-## Install on iPhone (free)
-For a proper iPhone home-screen web app, the files need to be served over HTTPS:
-1. Create a free GitHub account and a new public repository named `reset-app`.
-2. Upload `index.html`, `manifest.webmanifest`, and `sw.js` to the repository root.
-3. In the repository, open Settings → Pages.
-4. Under Build and deployment, choose Deploy from a branch, select `main` and `/ (root)`, then Save.
-5. Wait for GitHub Pages to publish the site. Open the provided HTTPS address in Safari on your iPhone.
-6. Tap Share → Add to Home Screen → Add.
+## Publish/update on GitHub Pages
+1. Unzip this archive.
+2. Open your existing GitHub repository.
+3. Upload and replace `index.html`, `manifest.webmanifest`, and `sw.js` in the repository root (the files inside the `reset_app` folder).
+4. Commit the changes.
+5. Open the GitHub Pages site in Safari. If the old version remains, close the installed web app, open the site in Safari, refresh, then reopen it from the Home Screen.
 
-GitHub Pages is a free static hosting option for public repositories. No paid plan or free trial is required.
-
-## Important privacy/storage notes
-- Habit, nutrition, meal, and weight data are saved in localStorage in the browser.
-- Photos are stored as image blobs in IndexedDB in the same browser/device and are not uploaded to a server.
-- Clearing Safari website data, deleting the website data, or changing browser/device can remove local data. Export/backup and cross-device sync are not implemented in this starter version.
-- For privacy, do not use a shared device/browser profile for personal progress photos.
-- The app currently uses manual food entry; it does not use a paid food database or barcode API.
+## Data and privacy
+- Habits, nutrition, meals, profile and weight use browser localStorage.
+- Progress photos remain in IndexedDB on the same device/browser.
+- Barcode lookup sends the barcode to Open Food Facts to retrieve public product data.
+- Meal photos are not uploaded by this starter workflow.
+- Clearing Safari website data may erase locally stored app data. Export/backup and cross-device sync are not included.
+- The app remains a web app/PWA; no native iOS project is required.
